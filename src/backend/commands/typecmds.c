@@ -385,6 +385,12 @@ DefineType(List *names, List *parameters)
 		else if (pg_strcasecmp(a, "char") == 0 ||
 				 pg_strcasecmp(a, "pg_catalog.bpchar") == 0)
 			alignment = 'c';
+		else if (pg_strcasecmp(a, "vec128") == 0 ||
+				 pg_strcasecmp(a, "pg_catalog.vec128") == 0)
+			alignment = 'x';
+		else if (pg_strcasecmp(a, "vec256") == 0 ||
+				 pg_strcasecmp(a, "pg_catalog.vec256") == 0)
+			alignment = 'y';
 		else
 			ereport(ERROR,
 					(errcode(ERRCODE_INVALID_PARAMETER_VALUE),

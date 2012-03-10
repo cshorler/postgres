@@ -575,6 +575,13 @@ DATA(insert OID = 2950 ( uuid			PGNSP PGUID 16 f b U f t \054 0 0 2951 uuid_in u
 DESCR("UUID datatype");
 DATA(insert OID = 2951 ( _uuid			PGNSP PGUID -1 f b A f t \054 0 2950 0 array_in array_out array_recv array_send - - array_typanalyze i x f 0 -1 0 0 _null_ _null_ _null_ ));
 
+/* SIMD vector types */
+DATA(insert OID = 3122 ISVALID = ENABLE_VECTOR_TYPES ( vec128			PGNSP PGUID 16 f b U f t \054 0 0 0 vec128_in vec128_out - - - - - x p f 0 -1 0 0 _null_ _null_ ));
+DESCR("128 bit vector type");
+
+DATA(insert OID = 3124 ISVALID = HAVE_AVX ( vec256			PGNSP PGUID 32 f b U f t \054 0 0 0 vec256_in vec256_out - - - - - y p f 0 -1 0 0 _null_ _null_ ));
+DESCR("256 bit vector type");
+
 /* text search */
 DATA(insert OID = 3614 ( tsvector		PGNSP PGUID -1 f b U f t \054 0 0 3643 tsvectorin tsvectorout tsvectorrecv tsvectorsend - - ts_typanalyze i x f 0 -1 0 0 _null_ _null_ _null_ ));
 DESCR("text representation for text search");

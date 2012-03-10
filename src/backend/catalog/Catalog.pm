@@ -66,9 +66,9 @@ sub Catalogs
             s/\s+/ /g;
 
             # Push the data into the appropriate data structure.
-            if (/^DATA\(insert(\s+OID\s+=\s+(\d+))?\s+\(\s*(.*)\s*\)\s*\)$/)
+            if (/^DATA\(insert(\s+OID\s+=\s+(\d+))?(\s+ISVALID\s+=\s+(\w+))?\s+\(\s*(.*)\s*\)\s*\)$/)
             {
-                push @{ $catalog{data} }, {oid => $2, bki_values => $3};
+                push @{ $catalog{data} }, {oid => $2, isvalid => $4, bki_values => $5};
             }
             elsif (/^DESCR\(\"(.*)\"\)$/)
             {

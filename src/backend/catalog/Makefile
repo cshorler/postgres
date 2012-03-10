@@ -26,7 +26,7 @@ all: $(BKIFILES) schemapg.h
 # the catalog header files are assembled into postgres.bki.  In particular,
 # indexing.h had better be last, and toasting.h just before it.
 
-POSTGRES_BKI_SRCS = $(addprefix $(top_srcdir)/src/include/catalog/,\
+POSTGRES_BKI_PRE_SRCS = $(addprefix $(top_srcdir)/src/include/catalog/,\
 	pg_proc.h pg_type.h pg_attribute.h pg_class.h \
 	pg_attrdef.h pg_constraint.h pg_inherits.h pg_index.h pg_operator.h \
 	pg_opfamily.h pg_opclass.h pg_am.h pg_amop.h pg_amproc.h \
@@ -40,8 +40,19 @@ POSTGRES_BKI_SRCS = $(addprefix $(top_srcdir)/src/include/catalog/,\
 	pg_foreign_data_wrapper.h pg_foreign_server.h pg_user_mapping.h \
 	pg_foreign_table.h \
 	pg_default_acl.h pg_seclabel.h pg_shseclabel.h pg_collation.h pg_range.h \
-	toasting.h indexing.h \
     )
+
+POSTGRES_BKI_MID_SRCS =
+
+ifeq ($(enable_vector_types), yes)
+POSTGRES_BKI_MID_SRCS += $(top_srcdir)/src/include/catalog/pg_vec_types.h
+endif
+	
+POSTGRES_BKI_POST_SRCS = $(addprefix $(top_srcdir)/src/include/catalog/,\
+	toasting.h indexing.h \
+	)
+
+POSTGRES_BKI_SRCS = $(POSTGRES_BKI_PRE_SRCS) $(POSTGRES_BKI_MID_SRCS) $(POSTGRES_BKI_POST_SRCS)
 
 # location of Catalog.pm
 catalogdir = $(top_srcdir)/src/backend/catalog

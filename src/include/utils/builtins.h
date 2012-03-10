@@ -445,6 +445,12 @@ extern Datum float84gt(PG_FUNCTION_ARGS);
 extern Datum float84ge(PG_FUNCTION_ARGS);
 extern Datum width_bucket_float8(PG_FUNCTION_ARGS);
 
+/* float_vec.c */
+extern Datum vec128_in(PG_FUNCTION_ARGS);
+extern Datum vec128_out(PG_FUNCTION_ARGS);
+extern Datum vec256_in(PG_FUNCTION_ARGS);
+extern Datum vec256_out(PG_FUNCTION_ARGS);
+
 /* dbsize.c */
 extern Datum pg_tablespace_size_oid(PG_FUNCTION_ARGS);
 extern Datum pg_tablespace_size_name(PG_FUNCTION_ARGS);
