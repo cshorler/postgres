@@ -172,6 +172,7 @@ enable_debug	= @enable_debug@
 enable_dtrace	= @enable_dtrace@
 enable_coverage	= @enable_coverage@
 enable_thread_safety	= @enable_thread_safety@
+enable_vector_types = @enable_vector_types@
 
 python_includespec	= @python_includespec@
 python_libdir		= @python_libdir@

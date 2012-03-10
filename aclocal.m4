@@ -1,6 +1,11 @@
 dnl aclocal.m4
 m4_include([config/ac_func_accept_argtypes.m4])
 m4_include([config/acx_pthread.m4])
+m4_include([config/ax_append_flag.m4])
+m4_include([config/ax_check_compile_flag.m4])
+m4_include([config/ax_append_compile_flags.m4])
+m4_include([config/ax_ext.m4])
+m4_include([config/ax_gcc_x86_cpuid.m4])
 m4_include([config/c-compiler.m4])
 m4_include([config/c-library.m4])
 m4_include([config/docbook.m4])

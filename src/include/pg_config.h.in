@@ -27,6 +27,12 @@
 /* The normal alignment of `long long int', in bytes. */
 #undef ALIGNOF_LONG_LONG_INT
 
+/* 128 bit vector alignment */
+#undef ALIGNOF_M128
+
+/* 256 bit vector alignment */
+#undef ALIGNOF_M256
+
 /* The normal alignment of `short', in bytes. */
 #undef ALIGNOF_SHORT
 
@@ -61,6 +67,10 @@
    (--enable-thread-safety) */
 #undef ENABLE_THREAD_SAFETY
 
+/* build with a MAXIMUM_ALIGNOF for suitable vector types and use
+   posix_memalign */
+#undef ENABLE_VECTOR_TYPES
+
 /* Define to nothing if C supports flexible array members, and to 1 if it does
    not. That way, with a declaration like `struct s { int n; double
    d[FLEXIBLE_ARRAY_MEMBER]; };', the struct hack can be used with pre-C99
@@ -89,6 +99,9 @@
 
 /* Define to 1 if you have the `append_history' function. */
 #undef HAVE_APPEND_HISTORY
+
+/* Support AVX (Advanced Vector Extensions) instructions */
+#undef HAVE_AVX
 
 /* Define to 1 if you have the `cbrt' function. */
 #undef HAVE_CBRT
@@ -275,19 +288,19 @@
 /* Define to 1 if you have the <kernel/OS.h> header file. */
 #undef HAVE_KERNEL_OS_H
 
-/* Define to 1 if `e_data' is member of `krb5_error'. */
+/* Define to 1 if `e_data' is a member of `krb5_error'. */
 #undef HAVE_KRB5_ERROR_E_DATA
 
-/* Define to 1 if `text.data' is member of `krb5_error'. */
+/* Define to 1 if `text.data' is a member of `krb5_error'. */
 #undef HAVE_KRB5_ERROR_TEXT_DATA
 
 /* Define to 1 if you have krb5_free_unparsed_name. */
 #undef HAVE_KRB5_FREE_UNPARSED_NAME
 
-/* Define to 1 if `client' is member of `krb5_ticket'. */
+/* Define to 1 if `client' is a member of `krb5_ticket'. */
 #undef HAVE_KRB5_TICKET_CLIENT
 
-/* Define to 1 if `enc_part2' is member of `krb5_ticket'. */
+/* Define to 1 if `enc_part2' is a member of `krb5_ticket'. */
 #undef HAVE_KRB5_TICKET_ENC_PART2
 
 /* Define to 1 if you have the <langinfo.h> header file. */
@@ -356,6 +369,9 @@
 
 /* Define to 1 if the system has the type `MINIDUMP_TYPE'. */
 #undef HAVE_MINIDUMP_TYPE
+
+/* Support MMX instructions */
+#undef HAVE_MMX
 
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #undef HAVE_NETINET_IN_H
@@ -454,6 +470,24 @@
 /* Define to 1 if you have the `srandom' function. */
 #undef HAVE_SRANDOM
 
+/* Support SSE (Streaming SIMD Extensions) instructions */
+#undef HAVE_SSE
+
+/* Support SSE2 (Streaming SIMD Extensions 2) instructions */
+#undef HAVE_SSE2
+
+/* Support SSE3 (Streaming SIMD Extensions 3) instructions */
+#undef HAVE_SSE3
+
+/* Support SSE4.1 (Streaming SIMD Extensions 4.1) instructions */
+#undef HAVE_SSE41
+
+/* Support SSE4.2 (Streaming SIMD Extensions 4.2) instructions */
+#undef HAVE_SSE42
+
+/* Support SSSE3 (Supplemental Streaming SIMD Extensions 3) instructions */
+#undef HAVE_SSSE3
+
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
 
@@ -511,28 +545,28 @@
 /* Define to 1 if the system has the type `struct option'. */
 #undef HAVE_STRUCT_OPTION
 
-/* Define to 1 if `sa_len' is member of `struct sockaddr'. */
+/* Define to 1 if `sa_len' is a member of `struct sockaddr'. */
 #undef HAVE_STRUCT_SOCKADDR_SA_LEN
 
 /* Define to 1 if the system has the type `struct sockaddr_storage'. */
 #undef HAVE_STRUCT_SOCKADDR_STORAGE
 
-/* Define to 1 if `ss_family' is member of `struct sockaddr_storage'. */
+/* Define to 1 if `ss_family' is a member of `struct sockaddr_storage'. */
 #undef HAVE_STRUCT_SOCKADDR_STORAGE_SS_FAMILY
 
-/* Define to 1 if `ss_len' is member of `struct sockaddr_storage'. */
+/* Define to 1 if `ss_len' is a member of `struct sockaddr_storage'. */
 #undef HAVE_STRUCT_SOCKADDR_STORAGE_SS_LEN
 
-/* Define to 1 if `__ss_family' is member of `struct sockaddr_storage'. */
+/* Define to 1 if `__ss_family' is a member of `struct sockaddr_storage'. */
 #undef HAVE_STRUCT_SOCKADDR_STORAGE___SS_FAMILY
 
-/* Define to 1 if `__ss_len' is member of `struct sockaddr_storage'. */
+/* Define to 1 if `__ss_len' is a member of `struct sockaddr_storage'. */
 #undef HAVE_STRUCT_SOCKADDR_STORAGE___SS_LEN
 
 /* Define to 1 if the system has the type `struct sockaddr_un'. */
 #undef HAVE_STRUCT_SOCKADDR_UN
 
-/* Define to 1 if `tm_zone' is member of `struct tm'. */
+/* Define to 1 if `tm_zone' is a member of `struct tm'. */
 #undef HAVE_STRUCT_TM_TM_ZONE
 
 /* Define to 1 if you have the <SupportDefs.h> header file. */
@@ -694,6 +728,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
