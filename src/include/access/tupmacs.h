@@ -140,16 +140,20 @@
  *
  * The attalign cases are tested in what is hopefully something like their
  * frequency of occurrence.
+ *
+ * added new alignment types for vectors x and y
  */
 #define att_align_nominal(cur_offset, attalign) \
 ( \
 	((attalign) == 'i') ? INTALIGN(cur_offset) : \
 	 (((attalign) == 'c') ? (intptr_t) (cur_offset) : \
 	  (((attalign) == 'd') ? DOUBLEALIGN(cur_offset) : \
-	   ( \
-			AssertMacro((attalign) == 's'), \
-			SHORTALIGN(cur_offset) \
-	   ))) \
+	   (((attalign) == 's') ? SHORTALIGN(cur_offset) : \
+		(((attalign) == 'x') ? VEC128ALIGN(cur_offset) : \
+		( \
+			AssertMacro((attalign) == 'y'), \
+			VEC256ALIGN(cur_offset) \
+	   ))))) \
 )
 
 /*

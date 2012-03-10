@@ -95,7 +95,11 @@
  *--------------------
  */
 
+#ifdef ENABLE_VECTOR_TYPES
+#define ALLOC_MINBITS		5
+#else
 #define ALLOC_MINBITS		3	/* smallest chunk size is 8 bytes */
+#endif
 #define ALLOCSET_NUM_FREELISTS	11
 #define ALLOC_CHUNK_LIMIT	(1 << (ALLOCSET_NUM_FREELISTS-1+ALLOC_MINBITS))
 /* Size of largest chunk that we use a fixed size for */
@@ -406,8 +410,23 @@ AllocSetContextCreate(MemoryContext parent,
 	{
 		Size		blksize = MAXALIGN(minContextSize);
 		AllocBlock	block;
+		int align_val;
 
+#ifdef ENABLE_VECTOR_TYPES
+		align_val = posix_memalign(&block, MAXIMUM_ALIGNOF, blksize);
+		if (align_val) {
+			/* either ENOMEM or EINVAL - which should be impossible */
+			MemoryContextStats(TopMemoryContext);
+			ereport(ERROR,
+					(errcode(ERRCODE_OUT_OF_MEMORY),
+					 errmsg("posix_memalign out of memory"),
+					 errdetail("Failed while creating memory context \"%s\".",
+							   name)));
+		}
+		// TODO: does anything assume block will be NULL if not successful... is it? should they?
+#else
 		block = (AllocBlock) malloc(blksize);
+
 		if (block == NULL)
 		{
 			MemoryContextStats(TopMemoryContext);
@@ -417,6 +436,7 @@ AllocSetContextCreate(MemoryContext parent,
 					 errdetail("Failed while creating memory context \"%s\".",
 							   name)));
 		}
+#endif
 		block->aset = context;
 		block->freeptr = ((char *) block) + ALLOC_BLOCKHDRSZ;
 		block->endptr = ((char *) block) + blksize;
@@ -576,9 +596,25 @@ AllocSetAlloc(MemoryContext context, Size size)
 	 */
 	if (size > set->allocChunkLimit)
 	{
+		int align_val = 0;
 		chunk_size = MAXALIGN(size);
 		blksize = chunk_size + ALLOC_BLOCKHDRSZ + ALLOC_CHUNKHDRSZ;
+
+#ifdef ENABLE_VECTOR_TYPES
+		align_val = posix_memalign(&block, MAXIMUM_ALIGNOF, blksize);
+		if (align_val) {
+			/* either ENOMEM or EINVAL - which should be impossible */
+			MemoryContextStats(TopMemoryContext);
+			ereport(ERROR,
+					(errcode(ERRCODE_OUT_OF_MEMORY),
+					 errmsg("posix_memalign out of memory"),
+					 errdetail("Failed on request of size %lu.",
+							   (unsigned long) size)));
+			// TODO: does anything assume block will be NULL if not successful... is it? should they?
+		}
+#else
 		block = (AllocBlock) malloc(blksize);
+
 		if (block == NULL)
 		{
 			MemoryContextStats(TopMemoryContext);
@@ -588,6 +624,7 @@ AllocSetAlloc(MemoryContext context, Size size)
 					 errdetail("Failed on request of size %lu.",
 							   (unsigned long) size)));
 		}
+#endif
 		block->aset = set;
 		block->freeptr = block->endptr = ((char *) block) + blksize;
 
@@ -724,6 +761,7 @@ AllocSetAlloc(MemoryContext context, Size size)
 	if (block == NULL)
 	{
 		Size		required_size;
+		int			align_val;
 
 		/*
 		 * The first such block has size initBlockSize, and we double the
@@ -743,7 +781,13 @@ AllocSetAlloc(MemoryContext context, Size size)
 			blksize <<= 1;
 
 		/* Try to allocate it */
+#ifdef ENABLE_VECTOR_TYPES
+		align_val = posix_memalign(&block, MAXIMUM_ALIGNOF, blksize);
+		if (align_val) /* either ENOMEM or EINVAL - which should be impossible */
+			block = NULL;
+#else
 		block = (AllocBlock) malloc(blksize);
+#endif
 
 		/*
 		 * We could be asking for pretty big blocks here, so cope if malloc
@@ -754,9 +798,26 @@ AllocSetAlloc(MemoryContext context, Size size)
 			blksize >>= 1;
 			if (blksize < required_size)
 				break;
+#ifdef ENABLE_VECTOR_TYPES
+			align_val = posix_memalign(&block, MAXIMUM_ALIGNOF, blksize);
+			if (align_val)
+				block = NULL;
+#else
 			block = (AllocBlock) malloc(blksize);
+#endif
 		}
 
+#ifdef ENABLE_VECTOR_TYPES
+		if (align_val) {
+			/* either ENOMEM or EINVAL - which should be impossible */
+			MemoryContextStats(TopMemoryContext);
+			ereport(ERROR,
+					(errcode(ERRCODE_OUT_OF_MEMORY),
+							errmsg("posix_memalign out of memory"),
+							errdetail("Failed on request of size %lu.",
+									(unsigned long) size)));
+		}
+#else
 		if (block == NULL)
 		{
 			MemoryContextStats(TopMemoryContext);
@@ -766,6 +827,7 @@ AllocSetAlloc(MemoryContext context, Size size)
 					 errdetail("Failed on request of size %lu.",
 							   (unsigned long) size)));
 		}
+#endif
 
 		block->aset = set;
 		block->freeptr = ((char *) block) + ALLOC_BLOCKHDRSZ;
@@ -894,6 +956,7 @@ AllocSetFree(MemoryContext context, void *pointer)
 static void *
 AllocSetRealloc(MemoryContext context, void *pointer, Size size)
 {
+	AllocPointer newPointer;
 	AllocSet	set = (AllocSet) context;
 	AllocChunk	chunk = AllocPointerGetChunk(pointer);
 	Size		oldsize = chunk->size;
@@ -929,6 +992,10 @@ AllocSetRealloc(MemoryContext context, void *pointer, Size size)
 		return pointer;
 	}
 
+	/*
+	 * Disable realloc call for a posix_memaligned chunk as it will probably fail
+	 */
+#ifndef ENABLE_VECTOR_TYPES
 	if (oldsize > set->allocChunkLimit)
 	{
 		/*
@@ -992,8 +1059,7 @@ AllocSetRealloc(MemoryContext context, void *pointer, Size size)
 
 		return AllocChunkGetPointer(chunk);
 	}
-	else
-	{
+#endif
 		/*
 		 * Small-chunk case.  We just do this by brute force, ie, allocate a
 		 * new chunk and copy the data.  Since we know the existing data isn't
@@ -1005,7 +1071,7 @@ AllocSetRealloc(MemoryContext context, void *pointer, Size size)
 		 * wrong freelist for the next initial palloc request, and so we leak
 		 * memory indefinitely.  See pgsql-hackers archives for 2007-08-11.)
 		 */
-		AllocPointer newPointer;
+
 
 		/* allocate new chunk */
 		newPointer = AllocSetAlloc((MemoryContext) set, size);
@@ -1017,7 +1083,7 @@ AllocSetRealloc(MemoryContext context, void *pointer, Size size)
 		AllocSetFree((MemoryContext) set, pointer);
 
 		return newPointer;
-	}
+
 }
 
 /*

@@ -3385,6 +3385,17 @@ DESCR("I/O");
 DATA(insert OID = 3117 (  fdw_handler_out	PGNSP PGUID 12 1 0 0 0 f f f t f i 1 0 2275 "3115" _null_ _null_ _null_ _null_ fdw_handler_out _null_ _null_ _null_ ));
 DESCR("I/O");
 
+/* vec types */
+DATA(insert OID = 3130 (  vec128_in		PGNSP PGUID 12 1 0 0 0 f f f t f i 1 0 3122 "2275" _null_ _null_ _null_ _null_	vec128_in _null_ _null_ _null_ ));
+DESCR("I/O");
+DATA(insert OID = 3131 (  vec128_out	PGNSP PGUID 12 1 0 0 0 f f f t f i 1 0 2275 "3122" _null_ _null_ _null_ _null_	vec128_out _null_ _null_ _null_ ));
+DESCR("I/O");
+DATA(insert OID = 3136 (  vec256_in		PGNSP PGUID 12 1 0 0 0 f f f t f i 1 0 3124 "2275" _null_ _null_ _null_ _null_	vec256_in _null_ _null_ _null_ ));
+DESCR("I/O");
+DATA(insert OID = 3137 (  vec256_out	PGNSP PGUID 12 1 0 0 0 f f f t f i 1 0 2275 "3124" _null_ _null_ _null_ _null_	vec256_out _null_ _null_ _null_ ));
+DESCR("I/O");
+
+
 /* cryptographic */
 DATA(insert OID =  2311 (  md5	   PGNSP PGUID 12 1 0 0 0 f f f t f i 1 0 25 "25" _null_ _null_ _null_ _null_ md5_text _null_ _null_ _null_ ));
 DESCR("MD5 hash");

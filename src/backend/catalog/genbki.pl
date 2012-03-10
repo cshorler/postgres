@@ -151,7 +151,8 @@ foreach my $catname ( @{ $catalogs->{names} } )
 
             # Write to postgres.bki
             my $oid = $row->{oid} ? "OID = $row->{oid} " : '';
-            printf BKI "insert %s( %s)\n", $oid, $row->{bki_values};
+            my $isvalid = $row->{isvalid} ? "ISVALID = $row->{isvalid} " : '';
+            printf BKI "insert %s%s( %s)\n", $oid, $isvalid, $row->{bki_values};
 
             # Write comments to postgres.description and postgres.shdescription
             if (defined $row->{descr})

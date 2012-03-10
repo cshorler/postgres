@@ -74,11 +74,14 @@ close			{ return(XCLOSE); }
 create			{ return(XCREATE); }
 
 OID				{ return(OBJ_ID); }
+ISVALID			{ return(IS_VALID); }
 bootstrap		{ return(XBOOTSTRAP); }
 "shared_relation"	{ return(XSHARED_RELATION); }
 "without_oids"	{ return(XWITHOUT_OIDS); }
 "rowtype_oid"	{ return(XROWTYPE_OID); }
 _null_			{ return(NULLVAL); }
+true			{ return(XTRUE); }
+false			{ return(XFALSE); }
 
 insert			{ return(INSERT_TUPLE); }
 

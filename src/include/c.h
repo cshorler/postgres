@@ -537,6 +537,9 @@ typedef NameData *Name;
 #define INTALIGN(LEN)			TYPEALIGN(ALIGNOF_INT, (LEN))
 #define LONGALIGN(LEN)			TYPEALIGN(ALIGNOF_LONG, (LEN))
 #define DOUBLEALIGN(LEN)		TYPEALIGN(ALIGNOF_DOUBLE, (LEN))
+/* SIMD implementations currently require 16 or 32 byte alignment */
+#define VEC128ALIGN(LEN)		TYPEALIGN(ALIGNOF_M128, (LEN))
+#define VEC256ALIGN(LEN)		TYPEALIGN(ALIGNOF_M256, (LEN))
 #define MAXALIGN(LEN)			TYPEALIGN(MAXIMUM_ALIGNOF, (LEN))
 /* MAXALIGN covers only built-in types, not buffers */
 #define BUFFERALIGN(LEN)		TYPEALIGN(ALIGNOF_BUFFER, (LEN))

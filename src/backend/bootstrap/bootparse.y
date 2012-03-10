@@ -65,6 +65,8 @@
 #define YYMALLOC palloc
 #define YYFREE   pfree
 
+#define YYDEBUG 1
+
 static void
 do_start(void)
 {
@@ -106,14 +108,14 @@ static int num_columns_read = 0;
 %type <list>  boot_index_params
 %type <ielem> boot_index_param
 %type <str>   boot_const boot_ident
-%type <ival>  optbootstrap optsharedrelation optwithoutoids
+%type <ival>  optbootstrap optsharedrelation optwithoutoids optisvalid optisnotvalid
 %type <oidval> oidspec optoideq optrowtypeoid
 
 %token <str> CONST_P ID
-%token OPEN XCLOSE XCREATE INSERT_TUPLE
+%token OPEN XCLOSE XCREATE INSERT_TUPLE 
 %token XDECLARE INDEX ON USING XBUILD INDICES UNIQUE XTOAST
 %token COMMA EQUALS LPAREN RPAREN
-%token OBJ_ID XBOOTSTRAP XSHARED_RELATION XWITHOUT_OIDS XROWTYPE_OID NULLVAL
+%token OBJ_ID IS_VALID XBOOTSTRAP XSHARED_RELATION XWITHOUT_OIDS XROWTYPE_OID NULLVAL XFALSE XTRUE
 
 %start TopLevel
 
@@ -136,6 +138,7 @@ Boot_Query :
 		  Boot_OpenStmt
 		| Boot_CloseStmt
 		| Boot_CreateStmt
+		| Boot_Ignore_InsertStmt
 		| Boot_InsertStmt
 		| Boot_DeclareIndexStmt
 		| Boot_DeclareUniqueIndexStmt
@@ -255,10 +258,14 @@ Boot_CreateStmt:
 				}
 		;
 
+Boot_Ignore_InsertStmt:
+  	INSERT_TUPLE optoideq optisnotvalid	LPAREN boot_column_ignore_val_list RPAREN {}
+		;
+
 Boot_InsertStmt:
-		  INSERT_TUPLE optoideq
+		  INSERT_TUPLE optoideq optisvalid
 				{
-					do_start();
+					do_start();				
 					if ($2)
 						elog(DEBUG4, "inserting row with oid %u", $2);
 					else
@@ -398,10 +405,25 @@ optoideq:
 		|										{ $$ = InvalidOid; }
 		;
 
+optisnotvalid:
+			IS_VALID EQUALS XFALSE
+		;
+
+optisvalid:
+			IS_VALID EQUALS XTRUE
+		|
+		;
+
 boot_column_val_list:
 		   boot_column_val
 		|  boot_column_val_list boot_column_val
 		|  boot_column_val_list COMMA boot_column_val
+		;
+
+boot_column_ignore_val_list:
+			boot_column_ignore_val
+		|	boot_column_ignore_val_list boot_column_ignore_val
+		|	boot_column_ignore_val_list COMMA boot_column_ignore_val
 		;
 
 boot_column_val:
@@ -409,8 +431,20 @@ boot_column_val:
 			{ InsertOneValue($1, num_columns_read++); }
 		| boot_const
 			{ InsertOneValue($1, num_columns_read++); }
+		| XTRUE
+			{ InsertOneValue("true", num_columns_read++); }
+		| XFALSE
+			{ InsertOneValue("false", num_columns_read++); }
 		| NULLVAL
 			{ InsertOneNull(num_columns_read++); }
+		;
+
+boot_column_ignore_val:
+			boot_ident {}
+		|	boot_const {}
+		|	XTRUE {}
+		|	XFALSE {}
+		|	NULLVAL {}
 		;
 
 boot_const :

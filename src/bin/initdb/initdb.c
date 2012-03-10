@@ -1166,6 +1166,12 @@ bootstrap_template1(void)
 	bki_lines = replace_token(bki_lines, "FLOAT8PASSBYVAL",
 							  FLOAT8PASSBYVAL ? "true" : "false");
 
+	bki_lines = replace_token(bki_lines, "ENABLE_VECTOR_TYPES",
+							  ENABLE_VECTOR_TYPES ? "true" : "false");
+
+	bki_lines = replace_token(bki_lines, "HAVE_AVX",
+							  HAVE_AVX ? "true" : "false");
+
 	bki_lines = replace_token(bki_lines, "POSTGRES", username);
 
 	bki_lines = replace_token(bki_lines, "ENCODING", encodingid);
