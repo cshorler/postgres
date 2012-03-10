@@ -19,7 +19,7 @@ m4_pattern_forbid(^PGAC_)dnl to catch undefined macros
 
 AC_INIT([PostgreSQL], [9.2devel], [pgsql-bugs@postgresql.org])
 
-m4_if(m4_defn([m4_PACKAGE_VERSION]), [2.63], [], [m4_fatal([Autoconf version 2.63 is required.
+m4_if(m4_defn([m4_PACKAGE_VERSION]), [2.68], [], [m4_fatal([Autoconf version 2.68 is required.
 Untested combinations of 'autoconf' and PostgreSQL versions are not
 recommended.  You can remove the check from 'configure.in' but it is then
 your responsibility whether the result works or not.])])
@@ -1687,6 +1687,39 @@ if test x"$HAVE_LONG_LONG_INT_64" = x"yes" ; then
 fi
 AC_CHECK_ALIGNOF(double)
 
+# Check whether to build with support for alignment of vector types
+has_posix_memalign=no
+AC_CHECK_FUNC([posix_memalign],[has_posix_memalign=yes])
+AC_MSG_CHECKING([whether to support vector types])
+PGAC_ARG_BOOL(enable, vector-types, no, [enable vector types])
+
+if test "x$has_posix_memalign" = xno && test "x$enable_vector_types" = xyes; then
+  enable_vector_types=no
+  AC_MSG_RESULT([$enable_vector_types])
+  AC_MSG_WARN([not enabling vector types as your platform doesn't appear to have posix_memalign])
+else
+  AC_MSG_RESULT([$enable_vector_types])
+fi
+  
+if test "x$has_posix_memalign" = xyes && test "x$enable_vector_types" = xyes; then
+  AC_SUBST(enable_vector_types)
+  
+  
+
+  # Intel uses 16 byte alignment upto SSE4.2 and 16/32 byte alignment for AVX depending on the instruction
+  # Altivec manual states 16 byte alignment
+  ALIGNOF_M128=16; ALIGNOF_M256=32
+  AC_DEFINE_UNQUOTED([ALIGNOF_M128], $ALIGNOF_M128, [128 bit vector alignment])
+  AC_DEFINE_UNQUOTED([ALIGNOF_M256], $ALIGNOF_M256, [256 bit vector alignment])
+
+  AC_DEFINE([ENABLE_VECTOR_TYPES], 1,
+            [build with a MAXIMUM_ALIGNOF for suitable vector types and use posix_memalign])
+  
+else
+  AC_DEFINE([ENABLE_VECTOR_TYPES], 0,
+            [build with a MAXIMUM_ALIGNOF for suitable vector types and use posix_memalign])
+fi
+
 # Compute maximum alignment of any basic type.
 # We assume long's alignment is at least as strong as char, short, or int;
 # but we must check long long (if it exists) and double.
@@ -1698,6 +1731,23 @@ fi
 if test x"$HAVE_LONG_LONG_INT_64" = xyes && test $MAX_ALIGNOF -lt $ac_cv_alignof_long_long_int ; then
   MAX_ALIGNOF="$ac_cv_alignof_long_long_int"
 fi
+if test "x$enable_vector_types" = xyes ; then  
+  # AVX operations can require 32 byte alignment, check build processor capabilities
+  # - this won't stop anything running if we get this far with enabled vector types
+  
+  AX_EXT
+  if test "x$ax_cv_have_avx_ext" = xyes ; then
+    MAX_ALIGNOF="$ALIGNOF_M256"
+  else
+    AC_DEFINE([HAVE_AVX], 0)
+    MAX_ALIGNOF="$ALIGNOF_M128"
+  fi
+fi
+
+# we could add more conditions for the platform e.g. i686, powerpc
+# however since extensions could potentially do more by testing themselves
+# we don't do platform tests other than testing for AVX.
+
 AC_DEFINE_UNQUOTED(MAXIMUM_ALIGNOF, $MAX_ALIGNOF, [Define as the maximum alignment requirement of any C data type.])
 
 
