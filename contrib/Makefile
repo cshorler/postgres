@@ -47,7 +47,8 @@ SUBDIRS = \
 		tsm_system_time \
 		tsearch2	\
 		unaccent	\
-		vacuumlo
+		vacuumlo	\
+		vec_types
 
 ifeq ($(with_openssl),yes)
 SUBDIRS += sslinfo
